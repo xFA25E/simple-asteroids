@@ -1,0 +1,5 @@
+* Simple-Asteroids
+
+  Simple asteroids game made with liballegro and common lisp.
+
+  Install liballegro before you can launch it
