@@ -8,9 +8,10 @@
                 ((:file "package")
                  (:file "utils")
                  (:file "types")
+                 (:file "init")
                  (:file "add")
-                 (:file "update")
                  (:file "collisions")
+                 (:file "update")
                  (:file "render")
                  (:file "main"))))
   :description ""

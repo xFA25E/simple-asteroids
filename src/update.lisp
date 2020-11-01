@@ -23,22 +23,22 @@
     (setf (dx ship) (* coefficient (dx ship))
           (dy ship) (* coefficient (dy ship))))
 
-  (when (rightp controls)
+  (unless (eq :released (right controls))
     (incf (direction ship) (direction-speed ship)))
 
-  (when (leftp controls)
+  (unless (eq :released (left controls))
     (decf (direction ship) (direction-speed ship)))
 
   (let* ((direction (direction ship))
          (direction-x (cos direction))
          (direction-y (sin direction)))
 
-    (when (upp controls)
+    (unless (eq :released (up controls))
       (let ((speed (thruster-speed ship)))
         (incf (dx ship) (* speed direction-x))
         (incf (dy ship) (* speed direction-y))))
 
-    (when (downp controls)
+    (unless (eq :released (down controls))
       (let ((speed (thruster-speed ship)))
         (decf (dx ship) (* speed direction-x))
         (decf (dy ship) (* speed direction-y))))
@@ -64,3 +64,69 @@
             (y right-wing) (+ back-y right-wing-dy)
             (x left-wing) (- back-x right-wing-dx)
             (y left-wing) (- back-y right-wing-dy)))))
+
+(defun update-controls (controls)
+  (declare (controls controls))
+  (when (eq :pressed (up controls))
+    (setf (up controls) :keep))
+  (when (eq :pressed (down controls))
+    (setf (down controls) :keep))
+  (when (eq :pressed (left controls))
+    (setf (left controls) :keep))
+  (when (eq :pressed (right controls))
+    (setf (right controls) :keep))
+  (when (eq :pressed (enter controls))
+    (setf (enter controls) :keep))
+  (when (eq :pressed (escape controls))
+    (setf (escape controls) :keep)))
+
+(defun update-game (sys)
+  (declare (system sys))
+  (if (eq :pressed (escape (controls sys)))
+      (setf (state sys) :game-over)
+      (let ((frames (frames sys))
+            (ship (ship sys)) (shots (shots sys)) (asteroids (asteroids sys))
+            (width (al:width sys)) (height (al:height sys)))
+
+        (update-ship ship width height (controls sys))
+        (update-shots shots width height)
+        (update-asteroids asteroids width height)
+
+        (add-shot shots ship (shot-option sys) frames)
+        (loop :for option :across (asteroid-options sys) :do
+          (add-asteroid asteroids width height option frames))
+
+        (loop :for asteroid :across asteroids
+              :when (usedp asteroid) :do
+                (loop :for shot :across shots
+                      :when (and (usedp shot) (collide-shot-asteroid-p shot asteroid)) :do
+                        (setf (usedp shot) nil (usedp asteroid) nil))
+              :when (and (usedp asteroid) (collide-ship-asteroid-p ship asteroid))
+                :do (setf (state sys) :game-over)
+                :and :do (loop-finish))
+
+        (incf (frames sys)))))
+
+(defun update-menu (sys)
+  (declare (system sys))
+  (cond
+    ((eq :pressed (up (controls sys)))
+     (setf (menu-index sys) (mod (1+ (menu-index sys)) (length (menu sys)))))
+    ((eq :pressed (down (controls sys)))
+     (setf (menu-index sys) (mod (1- (menu-index sys)) (length (menu sys)))))
+    ((eq :pressed (enter (controls sys)))
+     (setf (state sys) (ecase (menu-index sys)
+                         (0 (init-game sys) :game)
+                         (1 :end)
+                         (2 :highscores))))))
+
+(defun update-game-over (sys)
+  (declare (system sys))
+  (let ((controls (controls sys)))
+    (when (or (eq :pressed (enter controls))
+              (eq :pressed (escape controls)))
+      (setf (state sys) :menu))))
+
+(defun update-highscores (sys)
+  (declare (system sys))
+  (setf (state sys) :menu))

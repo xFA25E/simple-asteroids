@@ -4,13 +4,13 @@
 
   Install liballegro before you can launch it
 
-* Todo [4/9]
+* Todo [5/9]
   1. [X] organize modules
   2. [X] make physics
   3. [X] optimize
   4. [X] refactor
-  5. [ ] add sounds
-  6. [ ] add menu
-  7. [ ] add highscore (db?)
+  5. [X] add menu
+  6. [ ] add highscore
+  7. [ ] add sounds
   8. [ ] graphics
   9. [ ] makefile and executable binary

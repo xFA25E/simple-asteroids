@@ -31,6 +31,11 @@
   (right-wing (make-point) :type point)
   (left-wing (make-point) :type point))
 
+(defstruct ship-option
+  (direction 0d0 :type double-float)
+  (dx 0d0 :type double-float)
+  (dy 0d0 :type double-float))
+
 (defstruct asteroid-option
   (speed 0d0 :type double-float)
   (radius 0d0 :type double-float)
@@ -43,39 +48,70 @@
   (duration 0 :type (integer 0)))
 
 (defstruct (controls (:conc-name))
-  (upp nil :type boolean)
-  (downp nil :type boolean)
-  (leftp nil :type boolean)
-  (rightp nil :type boolean)
-  (escapep nil :type boolean))
+  (up :released :type keyword)
+  (down :released :type keyword)
+  (left :released :type keyword)
+  (right :released :type keyword)
+  (enter :released :type keyword)
+  (escape :released :type keyword))
 
 (defclass system (al:system)
-  ((ship
-    :initform (make-ship)
-    :type ship
-    :initarg :ship
-    :reader ship)
-   (asteroids
-    :initform (make-array 0)
-    :type (simple-array asteroid)
-    :initarg :asteroids
-    :reader asteroids)
-   (shots
-    :initform (make-array 0)
-    :type (simple-array shot)
-    :initarg :shots
-    :reader shots)
-   (frames :initform 0 :type (integer 0) :accessor frames)
+  ((ship :type ship :initarg :ship :reader ship)
+   (asteroids :type (simple-array asteroid) :initarg :asteroids :reader asteroids)
+   (shots :type (simple-array shot) :initarg :shots :reader shots)
+   (frames :type (integer 0) :initarg :frames :accessor frames)
    (state :initform :start :type keyword :accessor state)
-   (asteroid-options
-    :initform (make-array 0)
-    :type (simple-array asteroid-option)
-    :initarg :asteroid-options
-    :reader asteroid-options)
-   (shot-option
-    :initform (make-shot-option)
-    :type shot-option
-    :initarg :shot-option
-    :reader shot-option)
-   (controls :initform (make-controls) :type controls :reader controls)
-   (game-over-font :initform (null-pointer) :type foreign-pointer :accessor game-over-font)))
+   (ship-option :type ship-option :initarg :ship-option :reader ship-option)
+   (asteroid-options :type (simple-array asteroid-option) :initarg :asteroid-options :reader asteroid-options)
+   (shot-option :type shot-option :initarg :shot-option :reader shot-option)
+   (controls :type controls :initarg :controls :reader controls)
+   (menu :type (simple-array string) :initarg :menu :reader menu)
+   (menu-index :type (integer 0 2) :initarg :menu-index :accessor menu-index)
+   (menu-font :type foreign-pointer :initarg :menu-font :accessor menu-font)
+   (game-over-font :type foreign-pointer :initarg :game-over-font :accessor game-over-font))
+  (:default-initargs
+   :title "Simple-Asteroids"
+   :width 1000 :height 700
+   :display-options '((:sample-buffers 1 :suggest) (:samples 8 :suggest))
+   :frames 0
+   :controls (make-controls)
+   :menu #("Game" "Exit" "Highscores")
+   :menu-index 0
+   :menu-font (null-pointer)
+   :game-over-font (null-pointer)
+
+   :ship
+   (make-ship
+    :thruster-speed 1d0
+    :brakes-coefficient 0.96d0
+    :direction-speed (* 5 (/ pi 180))
+    :nose-length 30
+    :wing-length 10)
+
+   :asteroids
+   (make-array
+    50
+    :element-type 'asteroid
+    :initial-contents
+    (loop :repeat 50 :collect (make-asteroid)))
+
+   :shots
+   (make-array
+    50
+    :element-type 'shot
+    :initial-contents
+    (loop :repeat 50 :collect (make-shot)))
+
+   :ship-option (make-ship-option)
+
+   :asteroid-options
+   (make-array
+    3
+    :element-type 'asteroid-option
+    :initial-contents
+    (list (make-asteroid-option :speed 6d0 :radius 15d0 :frequency 60)
+          (make-asteroid-option :speed 3d0 :radius 30d0 :frequency 150)
+          (make-asteroid-option :speed 1d0 :radius 45d0 :frequency 375)))
+
+   :shot-option
+   (make-shot-option :speed 25d0 :radius 2d0 :frequency 5 :duration 90)))
