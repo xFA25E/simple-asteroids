@@ -17,3 +17,10 @@
         `(with-font (,variable ,expression)
            (with-fonts ,(rest binds)
              ,@body)))))
+
+(defun sorted-insert (element array)
+  (declare ((integer 0) element) ((simple-array (integer 0)) array))
+  (let ((position (position element array :test #'>)))
+    (when position
+      (setf (subseq array (1+ position)) (subseq array position)
+            (aref array position) element))))

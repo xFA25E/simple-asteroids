@@ -99,8 +99,9 @@
         (loop :for asteroid :across asteroids
               :when (usedp asteroid) :do
                 (loop :for shot :across shots
-                      :when (and (usedp shot) (collide-shot-asteroid-p shot asteroid)) :do
-                        (setf (usedp shot) nil (usedp asteroid) nil))
+                      :when (and (usedp shot) (collide-shot-asteroid-p shot asteroid))
+                        :do (setf (usedp shot) nil (usedp asteroid) nil)
+                        :and :do (incf (current-highscore sys) (round (radius asteroid))))
               :when (and (usedp asteroid) (collide-ship-asteroid-p ship asteroid))
                 :do (setf (state sys) :game-over)
                 :and :do (loop-finish))
@@ -125,8 +126,12 @@
   (let ((controls (controls sys)))
     (when (or (eq :pressed (enter controls))
               (eq :pressed (escape controls)))
+      (sorted-insert (current-highscore sys) (highscores sys))
       (setf (state sys) :menu))))
 
 (defun update-highscores (sys)
   (declare (system sys))
-  (setf (state sys) :menu))
+  (let ((controls (controls sys)))
+    (when (or (eq :pressed (enter controls))
+              (eq :pressed (escape controls)))
+      (setf (state sys) :menu))))

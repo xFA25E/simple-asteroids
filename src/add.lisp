@@ -30,11 +30,9 @@
                     (radius asteroid) radius
                     (radius-squared asteroid) (expt radius 2)
                     (usedp asteroid) t)
-              (case (random-elt #(:vertical :horizontal))
-                (:horizontal
-                 (setf (x asteroid) (random (+ 1d0 width))
-                       (y asteroid) 0d0))
-                (:vertical
-                 (setf (x asteroid) 0d0
-                       (y asteroid) (random (+ 1d0 height)))))
+              (case (random 2)
+                (0 (setf (x asteroid) (random (+ 1d0 width))
+                         (y asteroid) 0d0))
+                (1 (setf (x asteroid) 0d0
+                         (y asteroid) (random (+ 1d0 height)))))
               (return-from add-asteroid)))))

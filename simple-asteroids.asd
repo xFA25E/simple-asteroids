@@ -2,7 +2,7 @@
   :version "0.1.0"
   :author ""
   :license ""
-  :depends-on ("cl-liballegro" "alexandria")
+  :depends-on ("cl-liballegro")
   :components ((:module "src"
                 :components
                 ((:file "package")

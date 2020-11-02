@@ -1,6 +1,5 @@
 (defpackage simple-asteroids
   (:use :cl)
-  (:import-from #:alexandria #:random-elt)
   (:import-from #:cffi
                 #:foreign-slot-value
                 #:null-pointer-p
@@ -14,4 +13,5 @@
                  add-shot add-asteroid
                  render-ship render-asteroids render-shots
                  render-game render-menu render-game-over render-highscores
-                 collide-ship-asteroid-p collide-shot-asteroid-p))
+                 collide-ship-asteroid-p collide-shot-asteroid-p
+                 sorted-insert))

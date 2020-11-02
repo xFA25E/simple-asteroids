@@ -7,10 +7,10 @@
 * Todo [5/9]
   1. [X] organize modules
   2. [X] make physics
-  3. [X] optimize
-  4. [X] refactor
-  5. [X] add menu
-  6. [ ] add highscore
+  3. [X] refactor
+  4. [X] add menu
+  5. [X] add highscore
+  6. [ ] graphics
   7. [ ] add sounds
-  8. [ ] graphics
+  8. [ ] optimize (fields to variablse, maybe stack allocate)
   9. [ ] makefile and executable binary

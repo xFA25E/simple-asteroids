@@ -22,4 +22,5 @@
   (declare (system sys))
   (init-ship (ship sys) (al:width sys) (al:height sys) (ship-option sys))
   (init-asteroids (asteroids sys))
-  (init-shots (shots sys)))
+  (init-shots (shots sys))
+  (setf (current-highscore sys) 0))

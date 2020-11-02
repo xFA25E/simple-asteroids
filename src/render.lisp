@@ -33,6 +33,9 @@
 (defun render-game (sys)
   (declare (system sys))
   (al:clear-to-color *black-color*)
+  (with-font (font (al:create-builtin-font))
+    (al:draw-text font *white-color* 1 1 (foreign-enum-value 'al::align-flags :left)
+                  (write-to-string (current-highscore sys))))
   (render-ship (ship sys))
   (render-shots (shots sys))
   (render-asteroids (asteroids sys))
@@ -51,11 +54,20 @@
   (declare (system sys))
   (al:clear-to-color *black-color*)
   (al:draw-text (game-over-font sys) *white-color*
-                (/ (al:width sys) 2) (/ (al:height sys) 2)
+                (/ (al:width sys) 2) (- (/ (al:height sys) 2) 25)
                 (foreign-enum-value 'al::align-flags :center)
                 "G A M E  O V E R")
+  (al:draw-text (game-over-font sys) *white-color*
+                (/ (al:width sys) 2) (+ (/ (al:height sys) 2) 25)
+                (foreign-enum-value 'al::align-flags :center)
+                (format nil "Score: ~d" (current-highscore sys)))
   (al:flip-display))
 
 (defun render-highscores (sys)
   (declare (system sys))
-  sys)
+  (al:clear-to-color *black-color*)
+  (al:draw-text (game-over-font sys) *white-color*
+                (/ (al:width sys) 2) (/ (al:height sys) 2)
+                (foreign-enum-value 'al::align-flags :center)
+                (format nil "~a" (highscores sys)))
+  (al:flip-display))

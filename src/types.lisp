@@ -47,20 +47,21 @@
   (frequency 1 :type (integer 1))
   (duration 0 :type (integer 0)))
 
+(deftype key-state () '(member :pressed :keep :released))
 (defstruct (controls (:conc-name))
-  (up :released :type keyword)
-  (down :released :type keyword)
-  (left :released :type keyword)
-  (right :released :type keyword)
-  (enter :released :type keyword)
-  (escape :released :type keyword))
+  (up :released :type key-state)
+  (down :released :type key-state)
+  (left :released :type key-state)
+  (right :released :type key-state)
+  (enter :released :type key-state)
+  (escape :released :type key-state))
 
 (defclass system (al:system)
   ((ship :type ship :initarg :ship :reader ship)
    (asteroids :type (simple-array asteroid) :initarg :asteroids :reader asteroids)
    (shots :type (simple-array shot) :initarg :shots :reader shots)
    (frames :type (integer 0) :initarg :frames :accessor frames)
-   (state :initform :start :type keyword :accessor state)
+   (state :initform :start :type (member :game :menu :game-over :highscores :start :end) :accessor state)
    (ship-option :type ship-option :initarg :ship-option :reader ship-option)
    (asteroid-options :type (simple-array asteroid-option) :initarg :asteroid-options :reader asteroid-options)
    (shot-option :type shot-option :initarg :shot-option :reader shot-option)
@@ -68,6 +69,8 @@
    (menu :type (simple-array string) :initarg :menu :reader menu)
    (menu-index :type (integer 0 2) :initarg :menu-index :accessor menu-index)
    (menu-font :type foreign-pointer :initarg :menu-font :accessor menu-font)
+   (current-highscore :type (integer 0) :initarg :current-highscore :accessor current-highscore)
+   (highscores :type (simple-array (integer 0)) :initarg :highscores :reader highscores)
    (game-over-font :type foreign-pointer :initarg :game-over-font :accessor game-over-font))
   (:default-initargs
    :title "Simple-Asteroids"
@@ -78,6 +81,8 @@
    :menu #("Game" "Exit" "Highscores")
    :menu-index 0
    :menu-font (null-pointer)
+   :current-highscore 0
+   :highscores (make-array 5 :element-type '(integer 0))
    :game-over-font (null-pointer)
 
    :ship
