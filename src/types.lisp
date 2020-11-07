@@ -1,122 +1,50 @@
 (in-package :simple-asteroids)
 
+(deftype display-size () '(integer 0 4000))
+(deftype display-float () '(double-float -4000d0 4000d0))
+(deftype radiants () `(double-float 0d0 ,(* 2 pi)))
+(deftype frequency () `(integer 1 ,most-positive-fixnum))
+(deftype duration () `(integer 0 ,most-positive-fixnum))
+(deftype resource-size () '(integer 50 50))
+(deftype resources (kind) `(simple-array ,kind (50)))
+(deftype key-state () '(member :pressed :keep :released))
+(deftype game-state () '(member :game :menu :game-over :highscores :start :end))
+(deftype highscore () `(integer 0 ,most-positive-fixnum))
+(deftype highscores () '(simple-array highscore (5)))
+(deftype menu () '(simple-array string (3)))
+(deftype menu-index () '(mod 3))
+
 (defstruct (point (:conc-name))
-  (x 0d0 :type double-float)
-  (y 0d0 :type double-float))
+  (x 0d0 :type display-float)
+  (y 0d0 :type display-float))
 
 (defstruct (moving-point (:include point) (:conc-name))
-  (dx 0d0 :type double-float)
-  (dy 0d0 :type double-float))
+  (dx 0d0 :type display-float)
+  (dy 0d0 :type display-float))
 
-(defstruct (moving-circle (:include moving-point) (:conc-name))
-  (radius 0d0 :type double-float))
-
-(defstruct (moving-circular-resource (:include moving-circle) (:conc-name))
+(defstruct (moving-point-resource (:include moving-point) (:conc-name))
   (usedp nil :type boolean))
 
+(defstruct (moving-circular-resource (:include moving-point-resource) (:conc-name))
+  (radius 0d0 :type display-float))
+
 (defstruct (asteroid (:include moving-circular-resource) (:conc-name))
-  (radius-squared 0d0 :type double-float))
+  (radius-squared 0d0 :type display-float)
+  (asteroid-direction 0d0 :type radiants)
+  (x-scale 0d0 :type display-float)
+  (y-scale 0d0 :type display-float))
 
 (defstruct (shot (:include moving-circular-resource) (:conc-name))
-  (duration 0 :type (integer 0)))
+  (duration 0 :type duration))
 
-(defstruct (ship (:include moving-point) (:conc-name))
-  (thruster-speed 0d0 :type double-float)
-  (brakes-coefficient 0d0 :type double-float)
-  (direction 0d0 :type double-float)
-  (direction-speed 0d0 :type double-float)
-  (nose-length 0 :type (integer 0 4000))
-  (wing-length 0 :type (integer 0 4000))
-  (nose (make-point) :type point)
-  (right-wing (make-point) :type point)
-  (left-wing (make-point) :type point))
+(defstruct (star (:include moving-point) (:conc-name))
+  (star-direction 0d0 :type radiants))
 
-(defstruct ship-option
-  (direction 0d0 :type double-float)
-  (dx 0d0 :type double-float)
-  (dy 0d0 :type double-float))
+(defstruct (explosion (:include point) (:conc-name))
+  (explosion-usedp nil :type boolean)
+  (explosion-duration 0 :type duration))
 
-(defstruct asteroid-option
-  (speed 0d0 :type double-float)
-  (radius 0d0 :type double-float)
-  (frequency 1 :type (integer 1)))
-
-(defstruct shot-option
-  (speed 0d0 :type double-float)
-  (radius 0d0 :type double-float)
-  (frequency 1 :type (integer 1))
-  (duration 0 :type (integer 0)))
-
-(deftype key-state () '(member :pressed :keep :released))
-(defstruct (controls (:conc-name))
-  (up :released :type key-state)
-  (down :released :type key-state)
-  (left :released :type key-state)
-  (right :released :type key-state)
-  (enter :released :type key-state)
-  (escape :released :type key-state))
-
-(defclass system (al:system)
-  ((ship :type ship :initarg :ship :reader ship)
-   (asteroids :type (simple-array asteroid) :initarg :asteroids :reader asteroids)
-   (shots :type (simple-array shot) :initarg :shots :reader shots)
-   (frames :type (integer 0) :initarg :frames :accessor frames)
-   (state :initform :start :type (member :game :menu :game-over :highscores :start :end) :accessor state)
-   (ship-option :type ship-option :initarg :ship-option :reader ship-option)
-   (asteroid-options :type (simple-array asteroid-option) :initarg :asteroid-options :reader asteroid-options)
-   (shot-option :type shot-option :initarg :shot-option :reader shot-option)
-   (controls :type controls :initarg :controls :reader controls)
-   (menu :type (simple-array string) :initarg :menu :reader menu)
-   (menu-index :type (integer 0 2) :initarg :menu-index :accessor menu-index)
-   (menu-font :type foreign-pointer :initarg :menu-font :accessor menu-font)
-   (current-highscore :type (integer 0) :initarg :current-highscore :accessor current-highscore)
-   (highscores :type (simple-array (integer 0)) :initarg :highscores :reader highscores)
-   (game-over-font :type foreign-pointer :initarg :game-over-font :accessor game-over-font))
-  (:default-initargs
-   :title "Simple-Asteroids"
-   :width 1000 :height 700
-   :display-options '((:sample-buffers 1 :suggest) (:samples 8 :suggest))
-   :frames 0
-   :controls (make-controls)
-   :menu #("Game" "Exit" "Highscores")
-   :menu-index 0
-   :menu-font (null-pointer)
-   :current-highscore 0
-   :highscores (make-array 5 :element-type '(integer 0))
-   :game-over-font (null-pointer)
-
-   :ship
-   (make-ship
-    :thruster-speed 1d0
-    :brakes-coefficient 0.96d0
-    :direction-speed (* 5 (/ pi 180))
-    :nose-length 30
-    :wing-length 10)
-
-   :asteroids
-   (make-array
-    50
-    :element-type 'asteroid
-    :initial-contents
-    (loop :repeat 50 :collect (make-asteroid)))
-
-   :shots
-   (make-array
-    50
-    :element-type 'shot
-    :initial-contents
-    (loop :repeat 50 :collect (make-shot)))
-
-   :ship-option (make-ship-option)
-
-   :asteroid-options
-   (make-array
-    3
-    :element-type 'asteroid-option
-    :initial-contents
-    (list (make-asteroid-option :speed 6d0 :radius 15d0 :frequency 60)
-          (make-asteroid-option :speed 3d0 :radius 30d0 :frequency 150)
-          (make-asteroid-option :speed 1d0 :radius 45d0 :frequency 375)))
-
-   :shot-option
-   (make-shot-option :speed 25d0 :radius 2d0 :frequency 5 :duration 90)))
+(defstruct (asteroid-initials (:conc-name asteroid-))
+  (speed 0d0 :type display-float)
+  (radius 0d0 :type display-float)
+  (frequency 1 :type frequency))

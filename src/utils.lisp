@@ -1,26 +1,55 @@
 (in-package :simple-asteroids)
 
+(declaim
+ (inline sorted-insert asset)
+ (type radiants +two-pi+ +half-pi+)
+ (ftype (function (highscore highscores) (values null &optional)) sorted-insert)
+ (ftype (function (string) (values string &optional)) asset))
+
 (defconstant +two-pi+ (* 2 pi))
 (defconstant +half-pi+ (/ pi 2))
 
-(defmacro with-font ((font expression) &body body)
-  `(let ((,font ,expression))
-     (when (null-pointer-p ,font)
-       (error "Error initializing font"))
-     (unwind-protect (progn ,@body)
-       (al:destroy-font ,font))))
+(define-modify-macro mulf (multiplicand) *)
+(defmacro modincf (place increment modulo)
+  (multiple-value-bind (temp-vars temp-vals vars set-form get-form)
+      (get-setf-expansion place)
+    `(let* (,@(mapcar #'list temp-vars temp-vals)
+            (,(first vars) (mod (+ ,get-form ,increment) ,modulo)))
+       ,set-form)))
 
-(defmacro with-fonts (binds &body body)
-  (if (null binds)
-      `(progn ,@body)
-      (destructuring-bind (variable expression) (first binds)
-        `(with-font (,variable ,expression)
-           (with-fonts ,(rest binds)
-             ,@body)))))
+(defmacro with-pointer ((var expression cleanup) &body body)
+  `(let ((,var ,expression))
+     (declare (type foreign-pointer ,var))
+     (when (null-pointer-p ,var)
+       (error ,(format nil "Error initializing pointer: (~A ~A ~A)" var expression cleanup)))
+     (unwind-protect ,(if (cdr body)
+                          (cons 'progn body)
+                          (car body))
+       (,cleanup ,var))))
+
+(defmacro with-bitmap ((var expression) &body body)
+  `(with-pointer (,var ,expression al:destroy-bitmap) ,@body))
+
+(defmacro with-font ((var expression) &body body)
+  `(with-pointer (,var ,expression al:destroy-font) ,@body))
+
+(defmacro with-sample ((var expression) &body body)
+  `(with-pointer (,var ,expression al:destroy-sample) ,@body))
+
+(defmacro with-pointers (((kind variable expression) &rest binds) &body body)
+  `(,(ecase kind (:bitmap 'with-bitmap) (:font 'with-font) (:sample 'with-sample))
+    (,variable ,expression)
+    ,@(if binds
+          (list `(with-pointers ,binds ,@body))
+          body)))
 
 (defun sorted-insert (element array)
-  (declare ((integer 0) element) ((simple-array (integer 0)) array))
   (let ((position (position element array :test #'>)))
+    (declare (type (or null fixnum) position))
     (when position
       (setf (subseq array (1+ position)) (subseq array position)
-            (aref array position) element))))
+            (aref array position) element)))
+  nil)
+
+(defun asset (path)
+  (namestring (asdf:system-relative-pathname "simple-asteroids" (concatenate 'string "assets/" path))))

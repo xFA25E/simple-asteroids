@@ -1,38 +1,61 @@
 (in-package :simple-asteroids)
 
-(defun add-shot (shots ship option frames)
-  (declare ((simple-array shot) shots) (ship ship) (shot-option option) ((integer 0) frames))
-  (when (zerop (mod frames (shot-option-frequency option)))
-    (loop :for shot :across shots
-          :unless (usedp shot) :do
-            (let ((direction (direction ship))
-                  (speed (shot-option-speed option)))
-              (setf (x shot) (x ship)
-                    (y shot) (y ship)
-                    (dx shot) (* speed (cos direction))
-                    (dy shot) (* speed (sin direction))
-                    (radius shot) (shot-option-radius option)
-                    (duration shot) (shot-option-duration option)
-                    (usedp shot) t)
-              (return-from add-shot)))))
+(declaim
+ (inline add-explosion add-shot add-asteroid)
+ (ftype (function (double-float double-float) (values null &optional)) add-explosion)
+ (ftype (function nil (values null &optional)) add-shot)
+ (ftype (function (asteroid-initials) (values null &optional)) add-asteroid))
 
-(defun add-asteroid (asteroids width height option frames)
-  (declare ((simple-array asteroid) asteroids) ((integer 1 4000) width height) (asteroid-option option)
-           ((integer 0) frames))
-  (when (zerop (mod frames (asteroid-option-frequency option)))
-    (loop :for asteroid :across asteroids
+(defun add-explosion (x y)
+  (al:play-sample
+   (ecase (random 2)
+     (0 *explosion-1-sample*)
+     (1 *explosion-2-sample*))
+   0.3 0 1.0 :once (null-pointer))
+
+  (loop :for explosion :of-type explosion :across *explosions*
+        :unless (explosion-usedp explosion) :do
+          (setf (x explosion) x
+                (y explosion) y
+                (explosion-usedp explosion) t
+                (explosion-duration explosion) +explosion-stage-1-start+)
+
+          (return-from add-explosion))
+  nil)
+
+(defun add-shot ()
+  (when (zerop (mod *frames* +shot-frequency+))
+    (loop :for shot :of-type shot :across *shots*
+          :unless (usedp shot) :do
+            (setf (x shot) *ship-nose-x*
+                  (y shot) *ship-nose-y*
+                  (dx shot) (* +shot-speed+ (cos *ship-direction*))
+                  (dy shot) (* +shot-speed+ (sin *ship-direction*))
+                  (radius shot) +shot-radius+
+                  (duration shot) +shot-duration+
+                  (usedp shot) t)
+            (return-from add-shot nil)))
+  nil)
+
+(defun add-asteroid (initials)
+  (when (zerop (mod *frames* (asteroid-frequency initials)))
+    (loop :for asteroid :of-type asteroid :across *asteroids*
           :unless (usedp asteroid) :do
             (let ((direction (random +two-pi+))
-                  (speed (asteroid-option-speed option))
-                  (radius (asteroid-option-radius option)))
+                  (speed (asteroid-speed initials))
+                  (radius (asteroid-radius initials)))
+              (declare (type radiants direction) (type display-float speed radius))
               (setf (dx asteroid) (* speed (cos direction))
                     (dy asteroid) (* speed (sin direction))
                     (radius asteroid) radius
                     (radius-squared asteroid) (expt radius 2)
-                    (usedp asteroid) t)
+                    (usedp asteroid) t
+                    (x-scale asteroid) (* radius +asteroid-bitmap-half-width-reciprocal+)
+                    (y-scale asteroid) (* radius +asteroid-bitmap-half-height-reciprocal+))
               (case (random 2)
-                (0 (setf (x asteroid) (random (+ 1d0 width))
+                (0 (setf (x asteroid) (random +display-width-d0+)
                          (y asteroid) 0d0))
                 (1 (setf (x asteroid) 0d0
-                         (y asteroid) (random (+ 1d0 height)))))
-              (return-from add-asteroid)))))
+                         (y asteroid) (random +display-height-d0+))))
+              (return-from add-asteroid nil))))
+  nil)

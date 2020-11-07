@@ -6,8 +6,9 @@
   :components ((:module "src"
                 :components
                 ((:file "package")
-                 (:file "utils")
                  (:file "types")
+                 (:file "utils")
+                 (:file "system")
                  (:file "init")
                  (:file "add")
                  (:file "collisions")
@@ -17,5 +18,5 @@
   :description ""
   :around-compile
   (lambda (next)
-    (proclaim '(optimize (compilation-speed 0) (debug 3) (safety 3) (space 0) (speed 0)))
+    (proclaim '(optimize (compilation-speed 0) (debug 0) (safety 0) (space 3) (speed 3)))
     (funcall next)))
