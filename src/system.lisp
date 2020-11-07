@@ -147,7 +147,7 @@
 
 (defconstant +ship-thruster-power+ 1d0)
 (defconstant +ship-brakes-coefficient+ 0.96d0)
-(defconstant +ship-rotation-speed+ (* 5d0 (/ pi 180d0)))
+(defconstant +ship-rotation-speed+ (* 5d0 (/ (coerce pi 'double-float) 180d0)))
 (defconstant +ship-half-nose-length+ (coerce +ship-bitmap-half-width+ 'display-float))
 (defconstant +ship-wing-length+ +ship-bitmap-half-height+)
 
@@ -160,11 +160,11 @@
 
 ;;; ASTERIOD
 
-(defconstant +asteroid-rotation-speed+ (* 2d0 (/ pi 180d0)))
+(defconstant +asteroid-rotation-speed+ (* 2d0 (/ (coerce pi 'double-float) 180d0)))
 
 ;;; STAR
 
-(defconstant +star-rotation-speed+ (* 2d0 (/ pi 180d0)))
+(defconstant +star-rotation-speed+ (* 2d0 (/ (coerce pi 'double-float) 180d0)))
 (defconstant +star-speed+ 0.25d0)
 
 ;;; RESOURCES COUNTS

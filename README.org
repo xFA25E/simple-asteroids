@@ -2,19 +2,6 @@
 
   Simple asteroids game made with liballegro and common lisp.
 
-  Install liballegro before you can launch it
+  Install liballegro before you can launch it.
 
-* Todo [12/13]
-  1. [X] organize modules
-  2. [X] make physics
-  3. [X] refactor
-  4. [X] add menu
-  5. [X] add highscore
-  6. [X] graphics
-  7. [X] add stars
-  8. [X] add explosions
-  9. [X] add sounds
-  10. [X] renaming (maybe option -> initial)
-  11. [X] optimize
-  12. [X] makefile and executable binary
-  13. [ ] try ecl
+  It was tested only on SBCL

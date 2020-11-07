@@ -2,7 +2,7 @@
 
 (deftype display-size () '(integer 0 4000))
 (deftype display-float () '(double-float -4000d0 4000d0))
-(deftype radiants () `(double-float 0d0 ,(* 2 pi)))
+(deftype radiants () `(double-float 0d0 ,(* 2 (coerce pi 'double-float))))
 (deftype frequency () `(integer 1 ,most-positive-fixnum))
 (deftype duration () `(integer 0 ,most-positive-fixnum))
 (deftype resource-size () '(integer 50 50))

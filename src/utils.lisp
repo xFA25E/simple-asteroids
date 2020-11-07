@@ -6,8 +6,8 @@
  (ftype (function (highscore highscores) (values null &optional)) sorted-insert)
  (ftype (function (string) (values string &optional)) asset))
 
-(defconstant +two-pi+ (* 2 pi))
-(defconstant +half-pi+ (/ pi 2))
+(defconstant +two-pi+ (* 2 (coerce pi 'double-float)))
+(defconstant +half-pi+ (/ (coerce pi 'double-float) 2))
 
 (define-modify-macro mulf (multiplicand) *)
 (defmacro modincf (place increment modulo)

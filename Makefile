@@ -1,5 +1,4 @@
-SBCL ?= lisp
-ECL ?= ecl
+SBCL ?= lisp-sbcl
 PACKAGE := simple-asteroids
 
 .PHONY: all clean test run build-sbcl
