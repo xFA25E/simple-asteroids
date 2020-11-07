@@ -5,16 +5,16 @@
   :depends-on ("cl-liballegro")
   :components ((:module "src"
                 :components
-                        ((:file "package")
-                         (:file "types")
-                         (:file "utils")
-                         (:file "system")
-                         (:file "init")
-                         (:file "add")
-                         (:file "collisions")
-                         (:file "update")
-                         (:file "render")
-                         (:file "main"))))
+                ((:file "package")
+                 (:file "types")
+                 (:file "utils")
+                 (:file "system")
+                 (:file "init")
+                 (:file "add")
+                 (:file "collisions")
+                 (:file "update")
+                 (:file "render")
+                 (:file "main"))))
   :description ""
   :around-compile
   (lambda (next)
