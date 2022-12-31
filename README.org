@@ -1,7 +1,9 @@
 * Simple-Asteroids
 
-  Simple asteroids game made with liballegro and common lisp.
+[[demonstration.gif]]
 
-  Install liballegro before you can launch it.
+Simple asteroids game made with liballegro and common lisp.
 
-  It was tested only on SBCL
+Install liballegro before you can launch it.
+
+It was tested only on SBCL
